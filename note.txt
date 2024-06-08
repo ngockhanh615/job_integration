@@ -1,0 +1,15 @@
+day 1:
+- da xu ly: them case null cho title, requirement cua topcv, careerviet
+- xu ly them:
+xu ly them cac truong khac
+xu ly loai bo gia tri null cua title, content ( co truong hop content la --)
+xem import thu vien de chay airflow
+cho truong nao do trong topcv thanh list
+
+co gang xong som de co lap lich chay airflow
+airflow: "/u02/opt/python/3.8.18/lib/python3.8/site-packages/airflow/utils/process_utils.py", line 319
+
+day 2:
+topdev.vn khong co salary là thỏa thuận
+
+last id: 4632

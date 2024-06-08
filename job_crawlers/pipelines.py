@@ -17,7 +17,7 @@ from datetime import datetime
 
 class JobPipeline:
     def open_spider(self, spider):
-        hostname = 'localhost'
+        hostname = '10.100.21.125'
         username = 'postgres'  # replace with your username
         password = 'postgres'  # replace with your password
         database = 'jobs'

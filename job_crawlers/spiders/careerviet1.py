@@ -1,5 +1,6 @@
 import scrapy
 from datetime import datetime
+import re
 
 class CareerVietSpider(scrapy.Spider):
     name = 'careerviet1'
@@ -35,62 +36,86 @@ class CareerVietSpider(scrapy.Spider):
         salary = response.meta['salary']
 
         location = response.css('#tab-1 > section > div.bg-blue > div > div:nth-child(1) > div > div > p > a::text').get()
-        content = response.css('#tab-1 > section > div.detail-row.reset-bullet > ul > li::text').getall()
+
+        content = [x.strip() for x in response.css('#tab-1 > section > div.detail-row.reset-bullet > ul > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not content:
-            content = response.css('#tab-1 > section > div.detail-row.reset-bullet > p::text').getall()
+            content = [x.strip() for x in response.xpath('//*[@id="tab-1"]/section/div[3]/p//text()').extract() if x.strip() and re.search(r'\w', x)]
         if not content:
-            content = response.css('body > main > section.template.template04 > div.bottom-template > div > div > div.col-lg-9-custom  > div.full-content > div:nth-child(2) > div > ul > li::text').getall()
+            content = [x.strip() for x in response.css('#tab-1 > section > div.detail-row > p::text').getall() if x.strip() and re.search(r'\w', x)]
         if not content:
-            content = response.css('#tab-1 > section > div.detail-row.reset-bullet > ul > li > p::text').getall()
+            content = [x.strip() for x in response.css('body > main > section.template.template04 > div.bottom-template > div > div > div.col-lg-9-custom  > div.full-content > div:nth-child(2) > div > ul > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not content:
-            content = response.css('#tab-1 > section > div.detail-row.reset-bullet > ol:nth-child(3) > li::text').getall()
+            content = [x.strip() for x in response.css('#tab-1 > section > div.detail-row.reset-bullet > ul > li > p::text').getall() if x.strip() and re.search(r'\w', x)]
+        if not content:
+            content = [x.strip() for x in response.css('#tab-1 > section > div.detail-row.reset-bullet > ol:nth-child(3) > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not content:
             return
-            
-        skills = ', '.join(response.css('#tab-1 > section > div.job-tags > ul > li > a::text').getall())
+
+        skills = [x.strip() for x in response.css('#tab-1 > section > div.job-tags > ul > li > a::text').getall() if x.strip() and re.search(r'\w', x)]
         if not skills:
-            skills = ', '.join(response.css('body > main > section.template.template04 > div.bottom-template > div > div > div.col-lg-9-custom > div.full-content > div.job-tags.detail-row > ul > li > a::text').getall())
-        requirement = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(2) > li::text').getall()
-        if not requirement:
-            requirement = response.css('body > main > section.template.template04 > div.bottom-template > div > div > div.col-lg-9-custom > div.full-content > div:nth-child(3) > div > ul:nth-child(1) > li::text').getall()
-        benefit = []
-        if not requirement:
-            requirement = [x.strip() for x in response.xpath('//*[@id="tab-1"]/section/div[4]/ul[1]/li//text()').extract() if x.strip()]
-        if not requirement:
-            requirement = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(3) > li::text').getall()
-            benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(7) > li::text').getall()
-            if not benefit:
-                benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(6) > li::text').getall()
-            if not benefit:
-                benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(5) > li::text').getall()
-            if not benefit:
-                benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(4) > li::text').getall()
-        if not requirement:
-            requirement = response.css('#tab-1 > section > div:nth-child(4) > p::text').getall()
+            skills = [x.strip() for x in response.css('body > main > section.template.template04 > div.bottom-template > div > div > div.col-lg-9-custom > div.full-content > div.job-tags.detail-row > ul > li > a::text').getall() if x.strip() and re.search(r'\w', x)]
         
+        requirement = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(2) > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not requirement:
-            requirement = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(3) > li::text').getall()
-            benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(5) > li::text').getall()
+            requirement = [x.strip() for x in response.css('body > main > section.template.template04 > div.bottom-template > div > div > div.col-lg-9-custom > div.full-content > div:nth-child(3) > div > ul:nth-child(1) > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not requirement:
-            requirement = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(2) > li > p::text').getall()
+            requirement = [x.strip() for x in response.xpath('//*[@id="tab-1"]/section/div[4]/ul[1]/li//text()').extract() if x.strip() and re.search(r'\w', x)]
         if not requirement:
-            requirement = response.css('#tab-1 > section > div:nth-child(4) > p > strong::text').getall()
-            requirement.extend(response.css('#tab-1 > section > div:nth-child(4) > p::text').getall())
+            requirement = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(3) > li::text').getall() if x.strip() and re.search(r'\w', x)]
+            benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(7) > li::text').getall() if x.strip() and re.search(r'\w', x)]
+            if not benefit:
+                benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(6) > li::text').getall() if x.strip() and re.search(r'\w', x)]
+            if not benefit:
+                benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(5) > li::text').getall() if x.strip() and re.search(r'\w', x)]
+            if not benefit:
+                benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(4) > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not requirement:
-            requirement = response.css('#tab-1 > section > div:nth-child(4) > ol > li::text').getall()
+            requirement = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > p::text').getall() if x.strip() and re.search(r'\w', x)]
+        if not requirement:
+            requirement = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(3) > li::text').getall() if x.strip() and re.search(r'\w', x)]
+            benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(5) > li::text').getall() if x.strip() and re.search(r'\w', x)]
+        if not requirement:
+            requirement = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(2) > li > p::text').getall() if x.strip() and re.search(r'\w', x)]
+        if not requirement:
+            requirement = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > p > strong::text').getall() if x.strip() and re.search(r'\w', x)]
+            requirement.extend([x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > p::text').getall() if x.strip() and re.search(r'\w', x)])
+        if not requirement:
+            requirement = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ol > li::text').getall() if x.strip() and re.search(r'\w', x)]
+        if not requirement:
+            requirement = [x.strip() for x in response.xpath('/html/body/main/section[3]/div[2]/div/div/div[1]/div[3]/div[3]/div//text()').extract() if x.strip() and re.search(r'\w', x)]
+        if not requirement:
+            requirement = [x.strip() for x in response.xpath('/html/body/main/section[3]/div[2]/div/div/div[1]/div[3]/div[3]/div/ul/li//text()').extract() if x.strip() and re.search(r'\w', x)]
+
         experience = response.css('#tab-1 > section > div.bg-blue > div > div:nth-child(3) > div > ul > li:nth-child(2) > p::text').get().strip() if response.css('#tab-1 > section > div.bg-blue > div > div:nth-child(3) > div > ul > li:nth-child(2) > p::text').get() else None
+
+        benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(4) > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not benefit:
-            benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(4) > li::text').getall()
+            benefit = [x.strip() for x in response.css('body > main > section.template.template04 > div.bottom-template > div > div > div.col-lg-9-custom > div.full-content > div:nth-child(3) > div > ul:nth-child(3) > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not benefit:
-            benefit = response.css('body > main > section.template.template04 > div.bottom-template > div > div > div.col-lg-9-custom > div.full-content > div:nth-child(3) > div > ul:nth-child(3) > li::text').getall()
+            benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(10) > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not benefit:
-            benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(10) > li::text').getall()
+            benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(7) > li > strong::text').getall() if x.strip() and re.search(r'\w', x)]
         if not benefit:
-            benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(7) > li > strong::text').getall()
+            benefit = [x.strip() for x in response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(5) > li::text').getall() if x.strip() and re.search(r'\w', x)]
         if not benefit:
-            benefit = response.css('#tab-1 > section > div:nth-child(4) > ul:nth-child(5) > li::text').getall()
-        if not benefit: 
-            benefit = response.xpath('//*[@id="tab-1"]/section/div[4]/ul[3]/li//text()').extract()
+            benefit = [x.strip() for x in response.xpath('//*[@id="tab-1"]/section/div[4]/ul[3]/li//text()').extract() if x.strip() and re.search(r'\w', x)]
+
+        if not title:
+            # append to log file
+            with open('/khanh/airflow/job_crawlers/log/error.log', 'a') as f:
+                f.write(f'missing title      : {response.url}\n')
+            return
+        if not content:
+            # append to log file
+            with open('/khanh/airflow/job_crawlers/log/error.log', 'a') as f:
+                f.write(f'missing content    : {response.url}\n')
+            return
+        if not requirement:
+            # append to log file
+            with open('/khanh/airflow/job_crawlers/log/error.log', 'a') as f:
+                f.write(f'missing requirement: {response.url}\n')
+            return        
+        
         yield {
             'title': title,
             'company_name': company_name,

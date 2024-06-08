@@ -1,23 +1,40 @@
 # settings.py
 
 # Set a custom User-Agent
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-
+# USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+# Set a list of User-Agents (optional, scrapy-user-agents has a default set)
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Gecko/20100101 Firefox/89.0',
+    # Latest Chrome User Agent
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+    # Latest Firefox User Agent
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/93.0',
+    # Latest Safari User Agent
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
+    # Latest Edge User Agent
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.0.0',
+    # Latest Opera User Agent
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 OPR/80.0.4170.72'
+    # Add more User-Agents if needed
+]
 # Add a delay between requests
-DOWNLOAD_DELAY = 3  # Increase delay to 3 seconds
+# DOWNLOAD_DELAY = 1.5  # Increase delay to 3 seconds
 
 # Enable AutoThrottle
 AUTOTHROTTLE_ENABLED = True
-AUTOTHROTTLE_START_DELAY = 1  # Initial download delay
-AUTOTHROTTLE_MAX_DELAY = 60  # Maximum download delay to avoid hitting the server too hard
-AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0  # Average number of requests Scrapy should be sending in parallel to each remote server
-AUTOTHROTTLE_DEBUG = False  # Enable to see throttling stats for every response received
+AUTOTHROTTLE_START_DELAY = 0.5  # Initial download delay
+AUTOTHROTTLE_MAX_DELAY = 1.5  # Maximum download delay to avoid hitting the server too hard
+# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0  # Average number of requests Scrapy should be sending in parallel to each remote server
+AUTOTHROTTLE_TARGET_CONCURRENCY = 4
+# AUTOTHROTTLE_DEBUG = False  # Enable to see throttling stats for every response received
 
 # Enable HTTP caching to avoid hitting the server with repeated requests
-HTTPCACHE_ENABLED = True
-HTTPCACHE_EXPIRATION_SECS = 0
-HTTPCACHE_DIR = 'httpcache'
-HTTPCACHE_IGNORE_HTTP_CODES = [429]
+HTTPCACHE_ENABLED = False
+# HTTPCACHE_EXPIRATION_SECS = 0
+# HTTPCACHE_DIR = '/khanh/airflow/job_crawlers/job_crawlers/httpcache'
+# HTTPCACHE_IGNORE_HTTP_CODES = [429]
+RETRY_HTTP_CODES = [429]
 HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 
@@ -25,29 +42,31 @@ SPIDER_MODULES = ["job_crawlers.spiders"]
 NEWSPIDER_MODULE = "job_crawlers.spiders"
 
 DELTAFETCH_ENABLED = True
-DELTAFETCH_DIR = "G:/My Drive/THDL/Project/Code/job_crawlers/job_crawlers/state"
+DELTAFETCH_DIR = "/khanh/airflow/job_crawlers/job_crawlers/state"
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "job_crawlers (+http://www.yourdomain.com)"
 # Add the user-agents middleware
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
+    'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
+    "job_crawlers.middlewares.TooManyRequestsRetryMiddleware": 543,
+    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110
 }
 SPIDER_MIDDLEWARES = {
-    'scrapy_deltafetch.DeltaFetch': 100,
+    'scrapy_deltafetch.DeltaFetch': 1,
 }
 
-# Set a list of User-Agents (optional, scrapy-user-agents has a default set)
-USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Gecko/20100101 Firefox/89.0',
-    # Add more User-Agents if needed
-]
+ITEM_PIPELINES = {
+    'job_crawlers.pipelines.JobPipeline': 300,
+}
+
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
-# Configure maximum concurrent requests performed by Scrapy (default: 16)
-#CONCURRENT_REQUESTS = 32
+# # Configure maximum concurrent requests performed by Scrapy (default: 16)
+# CONCURRENT_REQUESTS = 16
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -80,6 +99,10 @@ ROBOTSTXT_OBEY = False
 #DOWNLOADER_MIDDLEWARES = {
 #    "job_crawlers.middlewares.JobCrawlersDownloaderMiddleware": 543,
 #}
+# DOWNLOADER_MIDDLEWARES = {
+#     'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
+#     "job_crawlers.middlewares.TooManyRequestsRetryMiddleware": 543
+# }
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -89,9 +112,9 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    'job_crawlers.pipelines.JobPipeline': 300,
-}
+#ITEM_PIPELINES = {
+#    "job_crawlers.pipelines.JobCrawlersPipeline": 300,
+#}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -118,3 +141,30 @@ ITEM_PIPELINES = {
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+# Retry many times since proxies often fail
+RETRY_TIMES = 10
+# Retry on most error codes since proxies fail for different reasons
+RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408]
+
+# DOWNLOADER_MIDDLEWARES = {
+#     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+#     'scrapy_proxies.RandomProxy': 100,
+#     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
+# }
+
+# Proxy list containing entries like
+# http://host1:port
+# http://username:password@host2:port
+# http://host3:port
+# ...
+PROXY_LIST = '/khanh/airflow/job_crawlers/proxies.txt'
+
+# Proxy mode
+# 0 = Every requests have different proxy
+# 1 = Take only one proxy from the list and assign it to every requests
+# 2 = Put a custom proxy to use in the settings
+PROXY_MODE = 0
+
+# If proxy mode is 2 uncomment this sentence :
+#CUSTOM_PROXY = "http://host1:port"

@@ -7,7 +7,7 @@ from html import unescape
 class VietnamworksSpider(scrapy.Spider):
     name = "vietnamworks"
     allowed_domains = ["vietnamworks.com"]
-    start_urls = ["https://ms.vietnamworks.com/job-search/v1.0/search"]
+    start_urls = ["http://ms.vietnamworks.com/job-search/v1.0/search"]
 
     def start_requests(self):
         page = 1
@@ -98,40 +98,39 @@ class VietnamworksSpider(scrapy.Spider):
             return
 
         for job in data['data']:
-            jobUrl = job.get('jobUrl', '')
+            jobTitle = job.get('jobTitle', '')
+            jobDescription = self.extract_text_from_html(job.get('jobDescription', ''))
+            companyName = job.get('companyName', '')
+            workingLocations = job.get('workingLocations', [])
+            if workingLocations:
+                address = workingLocations[0].get('address', '')
+            else:
+                address = ''
+            yearsOfExperience = job.get('yearsOfExperience', '')
+            jobRequirement = self.extract_text_from_html(job.get('jobRequirement', ''))
+            benefits = job.get('benefits', [])
+            skills = [skill.get('skillName', '') for skill in job.get('skills', [])]
+            salary = job.get('prettySalary', '')
+
+            benefit_values = [benefit.get('benefitValue', '') for benefit in benefits]
+
             date_posted = job.get('approvedOn', '')
             date_posted = self.convert_date_format(date_posted)
-            if jobUrl:
-                yield scrapy.Request(jobUrl, self.parse_job_details, meta={
-                    'date_posted': date_posted,
-                    'jobTitle': job.get('jobTitle', ''),
-                    'jobDescription': self.extract_text_from_html(job.get('jobDescription', '')),
-                    'companyName': job.get('companyName', ''),
-                    'yearsOfExperience': job.get('yearsOfExperience', ''),
-                    'jobRequirement': self.extract_text_from_html(job.get('jobRequirement', '')),
-                    'benefits': ', '.join([benefit.get('benefitValue', '') for benefit in job.get('benefits', [])]),
-                    'skills': ', '.join([skill.get('skillName', '') for skill in job.get('skills', [])]),
-                    'salary': job.get('prettySalary', ''),
-                    'source': 'vietnamworks',
-                    'url': jobUrl
-                })
 
-    def parse_job_details(self, response):
-        location = response.css('#vnwLayout__col > div > div.sc-37577279-0.joYsyf > div.sc-37577279-3.drWnZq > div > div:nth-child(1) > div:nth-child(2) > p::text').get(default='').strip()
-        yield {
-            'title': response.meta['jobTitle'],
-            'content': response.meta['jobDescription'],
-            'company_name': response.meta['companyName'],
-            'location': location,
-            'experience': f"{response.meta['yearsOfExperience']} năm",
-            'requirement': response.meta['jobRequirement'],
-            'benefit': response.meta['benefits'],
-            'date_posted': response.meta['date_posted'],
-            'source': response.meta['source'],
-            'url': response.meta['url'],
-            'skills': response.meta['skills'],
-            'salary': response.meta['salary']
-        }
+            yield {
+                'title': jobTitle,
+                'content': jobDescription,
+                'company_name': companyName,
+                'location': address,
+                'experience': f"{yearsOfExperience} năm",
+                'requirement': jobRequirement,
+                'benefit': ', '.join(benefit_values),
+                'date_posted': date_posted,
+                'source': 'vietnamworks',
+                'url': job.get('jobUrl', ''),
+                'skills': ', '.join(skills),
+                'salary': salary
+            }
 
     def convert_date_format(self, date_str):
         """

@@ -62,6 +62,23 @@ class TopdevSpider(scrapy.Spider):
         # benefit_selector = Selector(text=benefit_html)
         # benefit_items = benefit_selector.css('ul li::text').getall()
         # benefit = '\n'.join([item.strip() for item in benefit_items])
+        requirement = response.meta['requirement'] if response.meta['requirement'] else ''
+        
+        if not title:
+            # append to log file
+            with open('/khanh/airflow/job_crawlers/log/error.log', 'a') as f:
+                f.write(f'missing title      : {response.url}\n')
+            return
+        if not content:
+            # append to log file
+            with open('/khanh/airflow/job_crawlers/log/error.log', 'a') as f:
+                f.write(f'missing content    : {response.url}\n')
+            return
+        if not requirement:
+            # append to log file
+            with open('/khanh/airflow/job_crawlers/log/error.log', 'a') as f:
+                f.write(f'missing requirement: {response.url}\n')
+            return
 
         yield {
             'title': title,
@@ -75,7 +92,7 @@ class TopdevSpider(scrapy.Spider):
             'source': 'topdev.vn',
             'url': response.url,
             'salary': response.meta['salary'] if response.meta['salary'] else '',
-            'requirement': response.meta['requirement'] if response.meta['requirement'] else ''
+            'requirement': requirement
         }
 
     def extract_experience_from_scripts(self, script_contents):

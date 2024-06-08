@@ -13,11 +13,14 @@ class TopdevSpider(scrapy.Spider):
         for job in data.get('data', []):
             detail_url = job.get('detail_url')
             date_posted = job.get('refreshed', {}).get('datetime')
+            skills = job.get('skills_str', '')
+            salary = job.get('salary', {}).get('value', '')
             if detail_url:
-                yield scrapy.Request(detail_url, self.parse_job_details, meta={'date_posted': date_posted})
+                yield scrapy.Request(detail_url, self.parse_job_details, meta={'date_posted': date_posted, 'skills': skills, 'salary': salary})
 
         # Pagination
         current_page = int(response.url.split('page=')[-1].split('&')[0])
+        print(f"Scraping page {current_page}...")
         next_page = current_page + 1
         next_url = f"https://api.topdev.vn/td/v2/jobs?fields[job]=id,slug,title,salary,company,extra_skills,skills_str,skills_arr,job_types_str,job_levels_arr,job_levels_ids,addresses,status_display,detail_url,job_url,salary,published,refreshed,requirements_arr,benefits,content,features&fields[company]=tagline,addresses,skills_arr,industries_arr,benefits&page={next_page}&locale=vi_VN&ordering=jobs_new"
         yield scrapy.Request(next_url, self.parse)
@@ -56,7 +59,9 @@ class TopdevSpider(scrapy.Spider):
             'benefit': benefit,
             'date_posted': response.meta['date_posted'],
             'source': 'topdev.vn',
-            'url': response.url
+            'url': response.url,
+            'skills': response.meta['skills'],
+            'salary': response.meta['salary']
         }
 
     def extract_experience_from_scripts(self, script_contents):
